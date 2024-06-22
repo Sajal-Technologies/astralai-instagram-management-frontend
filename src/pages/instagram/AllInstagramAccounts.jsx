@@ -18,6 +18,8 @@ const AllInstagramAccounts = () => {
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [deleteAccountId, setDeleteAccountId] = useState(null);
 
+  const isAdmin = localStorage.getItem('is_admin') === 'true' || localStorage.getItem('is_admin') === true ? true : false;
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -27,7 +29,7 @@ const AllInstagramAccounts = () => {
       setSuccess('');
 
       try {
-        const response = await axios.get(`${baseUrl}/api/get-insta-account/`, {
+        const response = await axios.get(`${baseUrl}${'/api/get-insta-account/'}`, {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('access_token')}`
           }

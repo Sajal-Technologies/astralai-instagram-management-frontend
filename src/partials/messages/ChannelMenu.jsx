@@ -1,5 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import Transition from '../../utils/Transition';
+import axios from 'axios';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { baseUrl } from '../../constants';
 
 import ChannelImage from '../../images/user-avatar-32.png';
 import ChannelImage01 from '../../images/channel-01.png';
@@ -9,9 +12,47 @@ import ChannelImage03 from '../../images/channel-03.png';
 function ChannelMenu() {
 
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [instagramAccounts, setInstagramAccounts] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const fromUsername = queryParams.get("fromUsername");
+  const toUsername = queryParams.get("toUsername");
+
+  const navigate = useNavigate();
 
   const trigger = useRef(null);
   const dropdown = useRef(null);
+
+  useEffect(() => {
+    const fetchInstagramAccounts = async () => {
+      setLoading(true);
+      setError('');
+      setSuccess('');
+
+      try {
+        const response = await axios.get(`${baseUrl}/api/get-insta-account/`, {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+          }
+        });
+
+        setInstagramAccounts(response.data.data);
+        console.log(response.data.data)
+        setSuccess('Instagram accounts fetched successfully.');
+      } catch (err) {
+        console.error('Error fetching Instagram accounts:', err);
+        setError(err.response?.data?.Message || 'Failed to fetch Instagram accounts.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchInstagramAccounts();
+  }, []);
 
   // close on click outside
   useEffect(() => {
@@ -34,6 +75,12 @@ function ChannelMenu() {
     return () => document.removeEventListener('keydown', keyHandler);
   });
 
+  const handleClickUsername = (fromUsername) => {
+    const params = new URLSearchParams(window.location.search);
+    params.set('fromUsername', fromUsername);
+    navigate({ search: params.toString() });
+  };
+
   return (
     <div className="relative">
       <button
@@ -45,7 +92,7 @@ function ChannelMenu() {
       >
         <img className="w-8 h-8 rounded-full mr-2" src={ChannelImage} width="32" height="32" alt="Group 01" />
         <div className="truncate">
-          <span className="font-semibold text-slate-800">#Marketing</span>
+          <span className="font-semibold text-slate-800">{fromUsername || "Select from account"}</span>
         </div>
         <svg className="w-3 h-3 shrink-0 ml-1 fill-current text-slate-400" viewBox="0 0 12 12">
           <path d="M5.9 11.4L.5 6l1.4-1.4 4 4 4-4L11.3 6z" />
@@ -66,39 +113,23 @@ function ChannelMenu() {
           onFocus={() => setDropdownOpen(true)}
           onBlur={() => setDropdownOpen(false)}
         >
-          <li>
-            <a className="font-medium text-sm text-slate-600 hover:text-slate-800 block py-1.5 px-3" href="#0" onClick={() => setDropdownOpen(false)}>
-              <div className="flex items-center justify-between">
-                <div className="grow flex items-center truncate">
-                  <img className="w-7 h-7 rounded-full mr-2" src={ChannelImage01} width="28" height="28" alt="Channel 01" />
-                  <div className="truncate">#Marketing</div>
+          {!loading &&
+            instagramAccounts.map((item, index) => (
+              <li key={index} className='cursor-pointer' onClick={() => handleClickUsername(item["Instagram username"])}> 
+              <a className="font-medium text-sm text-slate-600 hover:text-slate-800 block py-1.5 px-3" href="#0" onClick={() => setDropdownOpen(false)}>
+                <div className="flex items-center justify-between">
+                  <div className="grow flex items-center truncate">
+                    <img className="w-7 h-7 rounded-full mr-2" src={ChannelImage01} width="28" height="28" alt="Channel 01" />
+                    <div className="truncate">{item["Instagram username"]}</div>
+                  </div>
+                  {fromUsername === item["Instagram username"] && <svg className="w-3 h-3 shrink-0 fill-current text-indigo-500 ml-1" viewBox="0 0 12 12">
+                    <path d="M10.28 1.28L3.989 7.575 1.695 5.28A1 1 0 00.28 6.695l3 3a1 1 0 001.414 0l7-7A1 1 0 0010.28 1.28z" />
+                  </svg>}
                 </div>
-                <svg className="w-3 h-3 shrink-0 fill-current text-indigo-500 ml-1" viewBox="0 0 12 12">
-                  <path d="M10.28 1.28L3.989 7.575 1.695 5.28A1 1 0 00.28 6.695l3 3a1 1 0 001.414 0l7-7A1 1 0 0010.28 1.28z" />
-                </svg>
-              </div>
-            </a>
-          </li>
-          <li>
-            <a className="font-medium text-sm text-slate-600 hover:text-slate-800 block py-1.5 px-3" href="#0" onClick={() => setDropdownOpen(false)}>
-              <div className="flex items-center justify-between">
-                <div className="grow flex items-center truncate">
-                  <img className="w-7 h-7 rounded-full mr-2" src={ChannelImage02} width="28" height="28" alt="Channel 02" />
-                  <div className="truncate">#Developing</div>
-                </div>
-              </div>
-            </a>
-          </li>
-          <li>
-            <a className="font-medium text-sm text-slate-600 hover:text-slate-800 block py-1.5 px-3" href="#0" onClick={() => setDropdownOpen(false)}>
-              <div className="flex items-center justify-between">
-                <div className="grow flex items-center truncate">
-                  <img className="w-7 h-7 rounded-full mr-2" src={ChannelImage03} width="28" height="28" alt="Channel 03" />
-                  <div className="truncate">#ProductSupport</div>
-                </div>
-              </div>
-            </a>
-          </li>
+              </a>
+            </li>
+            ))
+          }
         </ul>
       </Transition>
     </div>

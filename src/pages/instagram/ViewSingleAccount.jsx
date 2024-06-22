@@ -37,6 +37,8 @@ function ViewSingleAccount() {
   const username = queryParams.get("username");
   const password = queryParams.get("password");
   const notes = queryParams.get("notes");
+  const id = queryParams.get("id");
+
 
   useEffect(() => {
     const fetchLeads = async () => {
@@ -126,7 +128,7 @@ function ViewSingleAccount() {
       await axios.post(
         `${baseUrl}/api/save-lead-data/`,
         {
-          instagram_id: 4,
+          instagram_id: id,
           leads: [newLead],
         },
         {
@@ -204,7 +206,7 @@ function ViewSingleAccount() {
       await axios.post(
         `${baseUrl}/api/save-lead-data/`,
         {
-          instagram_id: 4,
+          instagram_id: id,
           leads: mappedData,
         },
         {
@@ -501,7 +503,9 @@ function ViewSingleAccount() {
                   {success && <p className="text-green-500">{success}</p>}
                   <ul className="space-y-3">
                     {filteredLeads.map((lead, index) => (
-                      <li
+                      lead.instagram_account === username
+                        &&
+                        <li
                         key={index}
                         className="flex items-center justify-space-between"
                       >
@@ -509,8 +513,8 @@ function ViewSingleAccount() {
                           <input
                             type="checkbox"
                             className="form-checkbox mr-2"
-                            checked={selectedLeads.includes(lead.lead_id)}
-                            onChange={() => handleSelectLead(lead.lead_id)}
+                            checked={selectedLeads.includes(lead["Lead ID"])}
+                            onChange={() => handleSelectLead(lead["Lead ID"])}
                           />
                           <div className="relative mr-3">
                             <img
@@ -539,7 +543,7 @@ function ViewSingleAccount() {
                           </div>
                           <Link
                             className="block flex-1 text-center text-sm text-indigo-500 hover:text-indigo-600 font-medium px-3 py-4"
-                            to={`/messages?fromUsername=${username}&toUsername=${lead.username}`}
+                            to={`/messages?fromUsername=${username}&toUsername=${JSON.stringify([lead.username])}&toName=${JSON.stringify([lead.name])}`}
                           >
                             <div className="flex items-center justify-end">
                               <svg
@@ -552,7 +556,8 @@ function ViewSingleAccount() {
                             </div>
                           </Link>
                         </div>
-                      </li>
+                      </li> 
+                      
                     ))}
                   </ul>
                 </div>

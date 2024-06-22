@@ -1,17 +1,78 @@
-import React from 'react';
-import ChannelMenu from './ChannelMenu';
-import DirectMessages from './DirectMessages';
-import Channels from './Channels';
+import React from "react";
+import ChannelMenu from "./ChannelMenu";
+import DirectMessages from "./DirectMessages";
+import Channels from "./Channels";
 
-function MessagesSidebar({
-  msgSidebarOpen,
-  setMsgSidebarOpen
-}) {
+import { useState } from "react";
+import axios from "axios";
+import { useLocation } from "react-router-dom";
+import { useEffect } from "react";
+import { baseUrl } from "../../constants";
+
+function MessagesSidebar({ msgSidebarOpen, setMsgSidebarOpen }) {
+
+  const [filteredLeads, setFilteredLeads] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const [leads, setLeads] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const fromUsername = queryParams.get("fromUsername");
+  const toUsername = queryParams.get("toUsername");
+
+  useEffect(() => {
+    const fetchLeads = async () => {
+      setLoading(true);
+      setError("");
+
+      try {
+        const response = await axios.post(
+          `${baseUrl}/api/get-lead-data/`,
+          {},
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+            },
+          }
+        );
+
+        setLeads(response.data.Lead_data);
+        setFilteredLeads(response.data.Lead_data)
+      } catch (err) {
+        console.error("Error fetching leads:", err);
+        setError(err.response?.data?.Message || "Failed to fetch leads.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchLeads();
+  }, []);
+
+
+
+  const handleSearchChange = (e) => {
+    const term = e.target.value.toLowerCase();
+    setSearchTerm(term);
+    setFilteredLeads(
+      leads.filter(
+        (lead) =>
+          lead.name.toLowerCase().includes(term) ||
+          lead.username.toLowerCase().includes(term) ||
+          lead.leads_status.toLowerCase().includes(term)
+      )
+    );
+  };
+
   return (
     <div
       id="messages-sidebar"
       className={`absolute z-20 top-0 bottom-0 w-full md:w-auto md:static md:top-auto md:bottom-auto -mr-px md:translate-x-0 transition-transform duration-200 ease-in-out ${
-        msgSidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        msgSidebarOpen ? "translate-x-0" : "-translate-x-full"
       }`}
     >
       <div className="sticky top-16 bg-white overflow-x-hidden overflow-y-auto no-scrollbar shrink-0 border-r border-slate-200 md:w-72 xl:w-80 h-[calc(100vh-64px)]">
@@ -25,7 +86,10 @@ function MessagesSidebar({
                 <ChannelMenu />
                 {/* Edit button */}
                 <button className="p-1.5 shrink-0 rounded border border-slate-200 hover:border-slate-300 shadow-sm ml-2">
-                  <svg className="w-4 h-4 fill-current text-slate-500" viewBox="0 0 16 16">
+                  <svg
+                    className="w-4 h-4 fill-current text-slate-500"
+                    viewBox="0 0 16 16"
+                  >
                     <path d="M11.7.3c-.4-.4-1-.4-1.4 0l-10 10c-.2.2-.3.4-.3.7v4c0 .6.4 1 1 1h4c.3 0 .5-.1.7-.3l10-10c.4-.4.4-1 0-1.4l-4-4zM4.6 14H2v-2.6l6-6L10.6 8l-6 6zM12 6.6L9.4 4 11 2.4 13.6 5 12 6.6z" />
                   </svg>
                 </button>
@@ -33,14 +97,25 @@ function MessagesSidebar({
             </div>
           </div>
           {/* Group body */}
-          <div className="px-5 py-4">
+          <div className="p-[10px]">
             {/* Search form */}
             <form className="relative">
               <label htmlFor="msg-search" className="sr-only">
                 Search
               </label>
-              <input id="msg-search" className="form-input w-full pl-9 focus:border-slate-300" type="search" placeholder="Search…" />
-              <button className="absolute inset-0 right-auto group" type="submit" aria-label="Search">
+              <input
+                id="msg-search"
+                className="form-input w-full pl-9 focus:border-slate-300"
+                type="search"
+                placeholder="Search…"
+                value={searchTerm}
+                onChange={handleSearchChange}
+              />
+              <button
+                className="absolute inset-0 right-auto group"
+                type="submit"
+                aria-label="Search"
+              >
                 <svg
                   className="w-4 h-4 shrink-0 fill-current text-slate-400 group-hover:text-slate-500 ml-3 mr-2"
                   viewBox="0 0 16 16"
@@ -52,9 +127,13 @@ function MessagesSidebar({
               </button>
             </form>
             {/* Direct messages */}
-            <DirectMessages msgSidebarOpen={msgSidebarOpen} setMsgSidebarOpen={setMsgSidebarOpen} />
-            {/* Channels */}
-            <Channels msgSidebarOpen={msgSidebarOpen} setMsgSidebarOpen={setMsgSidebarOpen} />
+            {!loading &&
+            <DirectMessages
+              msgSidebarOpen={msgSidebarOpen}
+              setMsgSidebarOpen={setMsgSidebarOpen}
+              leads={filteredLeads}
+            />
+            }
           </div>
         </div>
       </div>

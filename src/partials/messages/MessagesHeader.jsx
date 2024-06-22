@@ -1,4 +1,5 @@
 import React from 'react';
+import { useLocation } from 'react-router-dom';
 
 import User01 from '../../images/user-32-01.jpg';
 import User02 from '../../images/user-32-07.jpg';
@@ -7,6 +8,13 @@ function MessagesHeader({
   msgSidebarOpen,
   setMsgSidebarOpen
 }) {
+
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const fromUsername = queryParams.get("fromUsername");
+  const toUsernames = JSON.parse(queryParams.get("toUsername") || "[]");
+  const toNames = JSON.parse(queryParams.get("toName") || "[]");
+
   return (
     <div className="sticky top-16">
       <div className="flex items-center justify-between bg-white border-b border-slate-200 px-4 sm:px-6 md:px-5 h-16">
@@ -25,27 +33,16 @@ function MessagesHeader({
             </svg>
           </button>
           {/* People list */}
-          <div className="flex -space-x-3 -ml-px">
-            <a className="block" href="#0">
+          <div className="flex items-center gap-2 overflow-x-auto">
+            <a className="block" >
               <img className="rounded-full border-2 border-white box-content" src={User01} width="32" height="32" alt="User 01" />
             </a>
-            <a className="block" href="#0">
-              <img className="rounded-full border-2 border-white box-content" src={User02} width="32" height="32" alt="User 04" />
-            </a>
+            <div className="whitespace-nowrap overflow-x-scroll py-[20px]">
+              <span>{toNames.length > 0 ? toNames.join(', ') : 'Select Recipient'}</span>
+              {toUsernames.length > 0 && <span> | </span>}
+              <span>{toUsernames.join(', ')}</span>
+            </div>
           </div>
-        </div>
-        {/* Buttons on the right side */}
-        <div className="flex">
-          <button className="p-1.5 shrink-0 rounded border border-slate-200 hover:border-slate-300 shadow-sm ml-2">
-            <svg className="w-4 h-4 fill-current text-slate-400" viewBox="0 0 16 16">
-              <path d="M8 0C3.6 0 0 3.6 0 8s3.6 8 8 8 8-3.6 8-8-3.6-8-8-8zm0 12c-.6 0-1-.4-1-1s.4-1 1-1 1 .4 1 1-.4 1-1 1zm1-3H7V4h2v5z" />
-            </svg>
-          </button>
-          <button className="p-1.5 shrink-0 rounded border border-slate-200 hover:border-slate-300 shadow-sm ml-2">
-            <svg className="w-4 h-4 fill-current text-indigo-500" viewBox="0 0 16 16">
-              <path d="M14.3 2.3L5 11.6 1.7 8.3c-.4-.4-1-.4-1.4 0-.4.4-.4 1 0 1.4l4 4c.2.2.4.3.7.3.3 0 .5-.1.7-.3l10-10c.4-.4.4-1 0-1.4-.4-.4-1-.4-1.4 0z" />
-            </svg>
-          </button>
         </div>
       </div>
     </div>

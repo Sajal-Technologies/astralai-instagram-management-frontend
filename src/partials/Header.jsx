@@ -4,6 +4,7 @@ import SearchModal from '../components/ModalSearch';
 import Notifications from '../components/DropdownNotifications';
 import Help from '../components/DropdownHelp';
 import UserMenu from '../components/DropdownProfile';
+import { logout } from '../pages/utility/Logout';
 
 function Header({
   sidebarOpen,
@@ -39,7 +40,7 @@ function Header({
 
           {/* Header: Right side */}
           <div className="flex items-center space-x-3">
-            <div>
+            {/* <div>
               <button
                 className={`w-8 h-8 flex items-center justify-center bg-slate-100 hover:bg-slate-200 transition duration-150 rounded-full ml-3 ${searchModalOpen && 'bg-slate-200'}`}
                 onClick={(e) => { e.stopPropagation(); setSearchModalOpen(true); }}
@@ -54,10 +55,13 @@ function Header({
               <SearchModal id="search-modal" searchId="search" modalOpen={searchModalOpen} setModalOpen={setSearchModalOpen} />
             </div>
             <Notifications align="right" />
-            <Help align="right" />
+            <Help align="right" /> */}
             {/*  Divider */}
+            {/* <hr className="w-px h-6 bg-slate-200 mx-3" />
+            <UserMenu align="right" /> */}
+            {localStorage.getItem('username') && <span>Hello, {localStorage.getItem('username')}</span>}
             <hr className="w-px h-6 bg-slate-200 mx-3" />
-            <UserMenu align="right" />
+            <span className='underline cursor-pointer' onClick={logout}>Logout</span>
 
           </div>
 

@@ -19,6 +19,9 @@ function EditInstagramAccount() {
   const queryParams = new URLSearchParams(location.search);
   const instaId = queryParams.get("id");
 
+  const isAdmin = localStorage.getItem('is_admin') === 'true' || localStorage.getItem('is_admin') === true ? true : false;
+
+
   useEffect(() => {
     setUsername(queryParams.get("username") || "");
     setPassword(queryParams.get("password") || "");
@@ -33,7 +36,7 @@ function EditInstagramAccount() {
 
     try {
       await axios.post(
-        `${baseUrl}/api/edit-insta-account/`,
+        `${baseUrl}${isAdmin ? '/api/admin/edit-insta-accounts/' : '/api/edit-insta-account/'}`,
         {
           insta_id: instaId,
           username,
