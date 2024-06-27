@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { baseUrl } from "../../constants";
 
 function MessagesFooter() {
@@ -13,8 +13,39 @@ function MessagesFooter() {
   const [message, setMessage] = useState("");
   const [scheduledTime, setScheduledTime] = useState("");
   const [loading, setLoading] = useState(false);
+  const [templateLoading, setTemplateLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+
+  useEffect(() => {
+    if (templateId) {
+      fetchTemplate(templateId);
+    }
+  }, [templateId]);
+
+  const fetchTemplate = async (id) => {
+    setTemplateLoading(true);
+    setError("");
+    try {
+      const response = await axios.post(
+        `${baseUrl}/api/get-message-template/`,
+        { temp_id: id },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+          },
+        }
+      );
+      const templateContent = response.data.Message_template_data[0]["Template Content"];
+      setMessage(templateContent);
+    } catch (error) {
+      console.error("Error fetching template:", error);
+      setError("Failed to fetch template");
+    } finally {
+      setTemplateLoading(false);
+    }
+  };
 
   const sendMessage = async (event) => {
     event.preventDefault();
@@ -28,18 +59,17 @@ function MessagesFooter() {
       ? {
           instagram_account_id: 1,
           recipient: JSON.parse(toUsername),
-          content: message || `Template message with ID: ${templateId}`,
+          username: JSON.parse(toUsername),
+          name: JSON.parse(toName),
+          custom_message: message,
           scheduled_time: scheduledTime,
         }
       : {
           instagram_account_id: 1,
           recipient_list: JSON.parse(toUsername),
-          message_list: [[parseInt(templateId)]],
-          date: "13-June-2024",
-          name: "",
-          company_service: "",
-          company_name: "",
-          address: "",
+          custom_message: message,
+          username: JSON.parse(toUsername),
+          name: JSON.parse(toName),
         };
 
     setLoading(true);
@@ -48,7 +78,7 @@ function MessagesFooter() {
 
     try {
       const response = await axios.post(
-        scheduledTime ? `${baseUrl}/api/add-message/` : `${baseUrl}/api/insta_messages/`,
+        scheduledTime ? `${baseUrl}/api/add-message/` : `${baseUrl}/api/single-insta-messages/`,
         data,
         {
           headers: {
@@ -74,10 +104,11 @@ function MessagesFooter() {
       <div className="flex flex-row items-center justify-between bg-white border-t border-slate-200 px-4 sm:px-6 md:px-5 h-16">
         <form className="grow flex w-[-webkit-fill-available]" onSubmit={sendMessage}>
           <div className="grow mr-3">
-            <input
+            <textarea
               id="message-input"
-              className="form-input w-full bg-slate-100 border-transparent focus:bg-white focus:border-slate-300"
+              className="form-input w-full bg-slate-100 border-transparent focus:bg-white focus:border-slate-300 mt-[10px]"
               type="text"
+              rows={2}
               placeholder={
                 !templateId
                   ? `Type Message or Click on Templates above.. `
@@ -90,16 +121,16 @@ function MessagesFooter() {
           </div>
           <input
             type="datetime-local"
-            className="form-input mr-3"
+            className="form-input m-[10px] mr-3"
             value={scheduledTime}
             onChange={(e) => setScheduledTime(e.target.value)}
           />
           <button
             type="submit"
-            className="btn bg-indigo-500 hover:bg-indigo-600 text-white whitespace-nowrap"
-            disabled={loading}
+            className="btn bg-indigo-500 hover:bg-indigo-600 text-white whitespace-nowrap m-[10px]"
+            disabled={loading || templateLoading}
           >
-            {loading ? "Sending... It may take a few seconds" : "Send ->"}
+            {loading || templateLoading ? "Sending... It may take a few seconds" : "Send ->"}
           </button>
         </form>
         {error && <p className="text-red-500 text-sm mt-2 mr-2 text-right">{error}</p>}

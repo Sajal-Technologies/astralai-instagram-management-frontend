@@ -15,12 +15,17 @@ function MessagesBody() {
   const [messageTemplates, setMessageTemplates] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const handleClickTemplate = (templateId) => {
+  const handleClickTemplate = (templateId, messageText) => {
     const params = new URLSearchParams(window.location.search);
     if (params.get("template") === templateId.toString()) {
       params.delete("template");
     } else {
       params.set("template", templateId);
+    }
+    if (params.get("messageText") === messageText.toString()) {
+      params.delete("messageText");
+    } else {
+      params.set("messageText", messageText);
     }
     navigate({ search: params.toString() });
   };
@@ -136,7 +141,7 @@ function MessagesBody() {
                   key={item["Message Template id"]}
                   className="flex items-start mb-4 last:mb-0 cursor-pointer"
                   onClick={() =>
-                    handleClickTemplate(item["Message Template id"])
+                    handleClickTemplate(item["Message Template id"], item["Template Content"])
                   }
                 >
                   <div>

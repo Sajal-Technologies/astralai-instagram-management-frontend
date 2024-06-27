@@ -11,6 +11,7 @@ const UsersManagementPage = () => {
   const [success, setSuccess] = useState("");
   const [editUser, setEditUser] = useState(null);
   const [deleteUser, setDeleteUser] = useState(null);
+  const [addUser, setAddUser] = useState({ email: "", password: "", name: "" });
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   useEffect(() => {
@@ -28,6 +29,32 @@ const UsersManagementPage = () => {
       setLoading(false);
     } catch (err) {
       setError("Failed to fetch users.");
+      setLoading(false);
+    }
+  };
+
+  const handleAddUser = async (user) => {
+    try {
+      setLoading(true);
+      await axios.post(
+        `${baseUrl}/api/register/`,
+        {
+          email: user.email,
+          password: user.password,
+          name: user.name,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      setSuccess("User added successfully.");
+      setAddUser({ email: "", password: "", name: "" });
+      fetchUsers();
+    } catch (err) {
+      setError("Failed to add user.");
       setLoading(false);
     }
   };
@@ -89,6 +116,15 @@ const UsersManagementPage = () => {
     handleEditUser(editUser);
   };
 
+  const handleAddChange = (e) => {
+    setAddUser({ ...addUser, [e.target.name]: e.target.value });
+  };
+
+  const handleAddSubmit = (e) => {
+    e.preventDefault();
+    handleAddUser(addUser);
+  };
+
   return (
     <div className="flex h-screen overflow-hidden">
       {/* Sidebar */}
@@ -106,6 +142,53 @@ const UsersManagementPage = () => {
               {error && <p className="text-red-500">{error}</p>}
               {success && <p className="text-green-500">{success}</p>}
               <h1 className="text-xl font-bold mb-4">User Management</h1>
+
+              <div className="mb-4">
+                <h2 className="text-lg font-bold mb-2">Add User</h2>
+                <form onSubmit={handleAddSubmit} className="bg-gray-100 p-4 rounded">
+                  <div className="mb-2">
+                    <label className="block mb-1 font-semibold">Email:</label>
+                    <input
+                      type="email"
+                      name="email"
+                      value={addUser.email}
+                      onChange={handleAddChange}
+                      className="border p-2 rounded w-full"
+                      required
+                    />
+                  </div>
+                  <div className="mb-2">
+                    <label className="block mb-1 font-semibold">Name:</label>
+                    <input
+                      type="text"
+                      name="name"
+                      value={addUser.name}
+                      onChange={handleAddChange}
+                      className="border p-2 rounded w-full"
+                      required
+                    />
+                  </div>
+                  <div className="mb-2">
+                    <label className="block mb-1 font-semibold">Password:</label>
+                    <input
+                      type="password"
+                      name="password"
+                      value={addUser.password}
+                      onChange={handleAddChange}
+                      className="border p-2 rounded w-full"
+                      required
+                    />
+                  </div>
+                  <div className="flex items-center">
+                    <button
+                      type="submit"
+                      className="bg-green-500 text-white px-4 py-2 rounded mr-2"
+                    >
+                      Add User
+                    </button>
+                  </div>
+                </form>
+              </div>
 
               {editUser && (
                 <div className="mb-4">

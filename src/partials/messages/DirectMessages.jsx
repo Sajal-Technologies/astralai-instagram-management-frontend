@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 
 import UserImage01 from "../../images/user-32-01.jpg";
@@ -17,7 +17,7 @@ function DirectMessages({ setMsgSidebarOpen, leads }) {
   const fromUsername = queryParams.get("fromUsername");
 
   // Filter leads based on fromUsername
-  const filteredLeads = leads.filter(lead => lead.instagram_account === fromUsername);
+  const filteredLeads = useMemo(() => leads.filter(lead => lead.instagram_account === fromUsername), [leads, fromUsername]);
 
   useEffect(() => {
     const csvFiles = [...new Set(filteredLeads.map((lead) => lead.csv_file_number))];

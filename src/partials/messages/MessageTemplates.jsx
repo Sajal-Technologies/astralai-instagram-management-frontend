@@ -84,6 +84,31 @@ function MessageTemplates() {
     }
   };
 
+  const handleDeleteTemplate = async (templateId) => {
+    setLoading(true);
+    setError("");
+    setSuccess("");
+    try {
+      await axios.post(
+        `${baseUrl}/api/delete-message-template/`,
+        { template_id: templateId },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+          },
+        }
+      );
+      setSuccess("Template deleted successfully");
+      fetchTemplates();
+    } catch (error) {
+      console.error("Error deleting template:", error);
+      setError("Failed to delete template");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const filteredTemplates = templates.filter((template) =>
     template["Template Name"].toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -102,23 +127,34 @@ function MessageTemplates() {
           <div className="px-4 sm:px-6 lg:px-8 py-8 max-w-9xl mx-auto">
             <div className="container mx-auto p-4">
               <h1 className="text-2xl font-bold mb-4">Message Templates</h1>
-              <p style={{paddingBottom:'10px'}}>These variables are available: {"{name}, {username}"}</p>
-              <form className="mb-4" style={{display:'flex', justifyContent:'center', alignItems:'flex-end', flexDirection:'column'}} onSubmit={handleAddTemplate}>
-                <div className="mb-2" style={{width:'-webkit-fill-available'}}>
+              <p style={{ paddingBottom: '10px' }}>
+                These variables are available: {"{name}, {username}"}
+              </p>
+              <form
+                className="mb-4"
+                style={{
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'flex-end',
+                  flexDirection: 'column',
+                }}
+                onSubmit={handleAddTemplate}
+              >
+                <div className="mb-2" style={{ width: '-webkit-fill-available' }}>
                   <input
                     type="text"
                     placeholder="Template Name"
                     className="form-input w-full"
-                    style={{width:'-webkit-fill-available'}}
+                    style={{ width: '-webkit-fill-available' }}
                     value={newTemplateName}
                     onChange={(e) => setNewTemplateName(e.target.value)}
                   />
                 </div>
-                <div className="mb-2" style={{width:'-webkit-fill-available'}}>
+                <div className="mb-2" style={{ width: '-webkit-fill-available' }}>
                   <textarea
                     placeholder="Template Content"
                     className="form-textarea w-full"
-                    style={{width:'-webkit-fill-available'}}
+                    style={{ width: '-webkit-fill-available' }}
                     value={newTemplateContent}
                     onChange={(e) => setNewTemplateContent(e.target.value)}
                   />
@@ -137,38 +173,47 @@ function MessageTemplates() {
                 <p>Loading...</p>
               ) : (
                 <div>
-                    <div className="mb-4">
-                <input
-                  type="text"
-                  placeholder="Search templates..."
-                  className="form-input w-full"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              </div>
-              <table className="min-w-full bg-white">
-                    
-                  <thead>
-                    <tr>
-                      <th className="py-2">Template Name</th>
-                      <th className="py-2">Template Content</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredTemplates.map((template) => (
-                      <tr key={template["Message Template id"]}>
-                        <td className="border px-4 py-2">
-                          {template["Template Name"]}
-                        </td>
-                        <td className="border px-4 py-2">
-                          {template["Template Content"]}
-                        </td>
+                  <div className="mb-4">
+                    <input
+                      type="text"
+                      placeholder="Search templates..."
+                      className="form-input w-full"
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                  </div>
+                  <table className="min-w-full bg-white">
+                    <thead>
+                      <tr>
+                        <th className="py-2">Template Name</th>
+                        <th className="py-2">Template Content</th>
+                        <th className="py-2">Actions</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {filteredTemplates.map((template) => (
+                        <tr key={template["Message Template id"]}>
+                          <td className="border px-4 py-2">
+                            {template["Template Name"]}
+                          </td>
+                          <td className="border px-4 py-2">
+                            {template["Template Content"]}
+                          </td>
+                          <td className="border px-4 py-2">
+                            <button
+                              onClick={() =>
+                                handleDeleteTemplate(template["Message Template id"])
+                              }
+                              className="bg-red-500 text-white px-2 py-1 rounded"
+                            >
+                              Delete
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
-                
               )}
             </div>
           </div>

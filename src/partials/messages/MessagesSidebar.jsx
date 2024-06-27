@@ -1,7 +1,6 @@
 import React from "react";
 import ChannelMenu from "./ChannelMenu";
 import DirectMessages from "./DirectMessages";
-import Channels from "./Channels";
 
 import { useState } from "react";
 import axios from "axios";
