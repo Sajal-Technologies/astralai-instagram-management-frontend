@@ -1,0 +1,32 @@
+name: Deploy to EC2
+on:
+  push:
+    branches:
+      - main
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: executing remote ssh commands using password
+        uses: appleboy/ssh-action@v0.1.5
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          password: ${{ secrets.EC2_PASSWORD }}
+          port: ${{ secrets.PORT }}
+          script: |
+            # sudo yum install git
+            ls  /home/ec2-user/
+            sudo yum update
+            sudo yum install git -y
+            sudo yum install -y nodejs
+            git clone https://<git access token>@github.com/singh12345akshay/devops.git
+            cd /home/github/frontend  
+            # nvm use 18
+            npm i
+            npm i sharp
+            npm run build
