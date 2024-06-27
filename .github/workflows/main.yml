@@ -11,13 +11,18 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: executing remote ssh commands using password
+      - name: Create PEM file
+        run: |
+          echo "${{ secrets.EC2_PEM_FILE }}" > ec2-key.pem
+          chmod 600 ec2-key.pem
+
+      - name: executing remote ssh commands
         uses: appleboy/ssh-action@v0.1.8
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USERNAME }}
-          password: ${{ secrets.EC2_PASSWORD }}
-          port: ${{ secrets.PORT }}
+          key: ec2-key.pem
+          port: ${{ secrets.PORT || 22 }}
           script: |
             sudo yum update -y
             sudo yum install git -y
@@ -30,3 +35,6 @@ jobs:
             npm install
             npm install sharp
             npm run build
+
+      - name: Clean up PEM file
+        run: rm ec2-key.pem
