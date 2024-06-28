@@ -1,1 +1,1 @@
-export const baseUrl = "http://3.210.12.205";
+export const baseUrl = "https://api.ample-automation.com";

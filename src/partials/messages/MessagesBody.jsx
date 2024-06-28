@@ -58,7 +58,7 @@ function MessagesBody() {
       return;
     }
     const params = new URLSearchParams(window.location.search);
-    params.set("toUsername", username);
+    params.set("toUsername", JSON.stringify([username]));
     navigate({ search: params.toString() });
   };
 
