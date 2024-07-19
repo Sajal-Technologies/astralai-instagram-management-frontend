@@ -9,6 +9,8 @@ function MessagesFooter() {
   const templateId = queryParams.get("template");
   const toUsername = queryParams.get("toUsername");
   const toName = queryParams.get("toName");
+  const fromUsername = queryParams.get("fromUsername");
+
 
   const [message, setMessage] = useState("");
   const [scheduledTime, setScheduledTime] = useState("");
@@ -55,17 +57,22 @@ function MessagesFooter() {
       return;
     }
 
+    const toUTC = (localTime) => {
+      const localDate = new Date(localTime);
+      return localDate.toISOString();
+    };
+
     const data = scheduledTime
       ? {
-          instagram_account_id: 1,
+          instagram_account_id: fromUsername,
           recipient: JSON.parse(toUsername),
           username: JSON.parse(toUsername),
           name: JSON.parse(toName),
           custom_message: message,
-          scheduled_time: scheduledTime,
+          scheduled_time: toUTC(scheduledTime),
         }
       : {
-          instagram_account_id: 1,
+          instagram_account_id: fromUsername,
           recipient_list: JSON.parse(toUsername),
           custom_message: message,
           username: JSON.parse(toUsername),
@@ -88,7 +95,7 @@ function MessagesFooter() {
         }
       );
       console.log("Message sent successfully:", response.data);
-      setSuccess("Message sent successfully");
+      setSuccess("Message Queued");
       setMessage("");
       setScheduledTime("");
     } catch (error) {
@@ -130,7 +137,7 @@ function MessagesFooter() {
             className="btn bg-indigo-500 hover:bg-indigo-600 text-white whitespace-nowrap m-[10px]"
             disabled={loading || templateLoading}
           >
-            {loading || templateLoading ? "Sending... It may take a few seconds" : "Send ->"}
+            {loading || templateLoading ? "Loading..." : "Send ->"}
           </button>
         </form>
         {error && <p className="text-red-500 text-sm mt-2 mr-2 text-right">{error}</p>}

@@ -105,7 +105,7 @@ function MessageHistory() {
                   {accounts.map((account) => (
                     <li
                       key={account.id}
-                      className={`p-2 cursor-pointer rounded mb-2 ${
+                      className={`p-2 cursor-pointer rounded mb-2 border-2 ${
                         selectedAccountId === account.id ? "bg-blue-500 text-white" : "hover:bg-blue-100"
                       }`}
                       onClick={() => setSelectedAccountId(account.id)}
@@ -117,7 +117,6 @@ function MessageHistory() {
 
                 {selectedAccountId && (
                   <div className="lg:w-2/3">
-                    <h2 className="text-2xl font-semibold mb-4 mt-9">Messages</h2>
                     <div className="flex space-x-4 mb-4">
                       <input
                         type="text"
